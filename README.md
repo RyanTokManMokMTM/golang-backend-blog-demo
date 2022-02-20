@@ -1,6 +1,5 @@
 ## blog-service Demo
-
-### File Structure
+Learning Gin-Framework and Golang via this simple project
 
 ### RESTful API
 **Tab API**
