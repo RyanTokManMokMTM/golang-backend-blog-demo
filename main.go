@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/RyanTokManMokMTM/blog-service/global"
 	"github.com/RyanTokManMokMTM/blog-service/internal/model"
 	"github.com/RyanTokManMokMTM/blog-service/internal/routers"
@@ -14,10 +15,50 @@ import (
 )
 
 /*
-Server Basic Components
-1.Consistent Response Standard(一致性的互動規則)
-2.
+TOOL to use:
+Viper - Load setting file
+ErrCode - Custom Error - consistent
+Logger -  Logger with different info and store at log file
 */
+
+// @title music api server
+// @version 1.0
+// @description  IOS Music Web Service
+
+// @contact.name jackson.tmm
+// @contact.url https://github.com/RyanTokManMokMTM
+// @contact.email RyanTokManMokMTM@hotmaiol.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
+// @schemes http
+
+func main() {
+	//using the config setting variable that have loaded from yaml file
+	gin.SetMode(global.ServerSetting.RunMode)
+	route := routers.NewRoute()
+	//ignore API First
+	//if gin.Mode() == gin.DebugMode {
+	//	route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFile.Handler))
+	//}
+	server := http.Server{
+		Addr:           fmt.Sprintf("127.0.0.1:%s", global.ServerSetting.HttpPort),
+		Handler:        route,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	//Testing Config setting is loaded or not
+	//fmt.Println(global.ServerSetting)
+	//fmt.Println(global.AppSetting)
+	//fmt.Println(global.DatabaseSetting)
+	//global logger testing
+	//global.Logger.Infof("%s :github.com/RyanTokManMokMTM/%s", "Testing", "blog-service")
+	log.Fatalln(server.ListenAndServe())
+}
 
 //used to init process
 func init() {
@@ -32,26 +73,6 @@ func init() {
 	if err := setupLogger(); err != nil {
 		log.Fatalf("init logger failed %s", err.Error())
 	}
-}
-
-func main() {
-	//using the config setting variable that have loaded from yaml file
-	gin.SetMode(global.ServerSetting.RunMode)
-	route := routers.NewRoute()
-	server := http.Server{
-		Addr:           ":8080",
-		Handler:        route,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-	//Testing Config setting is loaded or not
-	//fmt.Println(global.ServerSetting)
-	//fmt.Println(global.AppSetting)
-	//fmt.Println(global.DatabaseSetting)
-	//global logger testing
-	global.Logger.Infof("%s :github.com/RyanTokManMokMTM/%s", "Testing", "blog-service")
-	log.Fatalln(server.ListenAndServe())
 }
 
 //setUpSetting Set up the global setting variable

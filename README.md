@@ -20,4 +20,3 @@
 | Delete specific Articles |   DELETE    |/articles/:id
 | Update specific Articles |     PUT     |/articles/:id
 |  Get specific Articles   |     GET     |/articles/:id
-|    Get Articles Lis

@@ -14,3 +14,11 @@ var (
 	UnauthorizedTokenGenerateError = NewError(106, "authorized failed, token generation failed")
 	TooManyRequest                 = NewError(107, "request is overloaded")
 )
+
+var (
+	ErrorGetTagListFail = NewError(201001, "Get Tag List Failed")
+	ErrorCreateTagFail  = NewError(201002, "Create Tag Failed")
+	ErrorUpdateTagFail  = NewError(201003, "Update Tag Failed")
+	ErrorDeleteTagFail  = NewError(201004, "Delete Tag Failed")
+	ErrorCountTagFail   = NewError(201005, "Count Tag Failed")
+)

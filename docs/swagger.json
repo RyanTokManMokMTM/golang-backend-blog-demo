@@ -1,0 +1,23 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "IOS Music Web Service",
+        "title": "music api server",
+        "contact": {
+            "name": "jackson.tmm",
+            "url": "https://github.com/RyanTokManMokMTM",
+            "email": "RyanTokManMokMTM@hotmaiol.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {}
+}
