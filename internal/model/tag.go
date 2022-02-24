@@ -22,7 +22,7 @@ func (t Tag) Count(db *gorm.DB) (int64, error) {
 	}
 	db = db.Where("state = ?", t.State)                                              //searching by the state
 	if err := db.Model(&t).Where("id_del = ? ", 0).Count(&count).Error; err != nil { //count the record
-		return 0, nil
+		return 0, err
 	}
 	return count, nil
 }
@@ -61,5 +61,5 @@ func (t Tag) Update(db *gorm.DB, value interface{}) error {
 }
 
 func (t Tag) Delete(db *gorm.DB) error {
-	return db.Where("id = ? AND is_del = ?", t.Model.ID, 0).Delete(&Tag{}).Error
+	return db.Where("id = ? AND is_del = ?", t.Model.ID, 0).Delete(&t).Error
 }

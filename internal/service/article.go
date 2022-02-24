@@ -1,5 +1,10 @@
 package service
 
+type ArticleRequest struct {
+	ID    uint32 `form:"id" binding:"required,gte=1"`
+	State uint8  `form:"state,default=1" binding:"oneof=0 1"`
+}
+
 //CountArticleRequest count record by name
 type CountArticleRequest struct {
 	Name  string `form:"name" binding:"max=100"`
@@ -31,3 +36,12 @@ type UpdateArticleRequest struct {
 type DeleteArticleRequest struct {
 	ID uint32 `form:"id" binding:"required,gte=1"`
 }
+
+//Services of article -> calling DAO Object
+
+func (serve *Service) CountArticle(param *CountArticleRequest)   {}
+func (serve *Service) ListArticle(param *ArticleListRequest)     {}
+func (serve *Service) GetArticle(param *ArticleRequest)          {}
+func (serve *Service) UpdateArticle(param *UpdateArticleRequest) {}
+func (serve *Service) CreateArticle(param *CreateArticleRequest) {}
+func (serve *Service) DeleteArticle(para *DeleteArticleRequest)  {}
