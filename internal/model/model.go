@@ -14,7 +14,7 @@ import (
 type (
 	Model struct {
 		ID         uint32 `json:"id" gorm:"primary_key"`
-		CreateBy   string `json:"create_by"`
+		CreatedBy  string `json:"created_by"`
 		ModifiedBy string `json:"modified_by"`
 		CreatedOn  uint32 `json:"created_on"`
 		ModifiedOn uint32 `json:"modified_on"`
@@ -43,9 +43,9 @@ func NewDBEngine(databaseSetting *setting.DatabaseSetting) (*gorm.DB, error) {
 	db.SingularTable(true)
 
 	//apply the callback function
-	db.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallBack)
-	db.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallBack)
-	db.Callback().Delete().Replace("gorm:delete", deleteCallBack)
+	db.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallBack) //when creating call this function
+	db.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallBack) //when updating call this function
+	db.Callback().Delete().Replace("gorm:delete", deleteCallBack)                              // when deleting calling this function for instead
 
 	db.DB().SetMaxIdleConns(global.DatabaseSetting.MaxIdleConns)
 	db.DB().SetMaxOpenConns(global.DatabaseSetting.MaxOpenConns)
@@ -111,8 +111,10 @@ func deleteCallBack(scope *gorm.Scope) {
 		//get the field
 		if str, ok := scope.Get("gorm:delete_option"); ok {
 			extraOpt = fmt.Sprintln(str) //set
+			//log.Println(extraOpt)
 		}
 
+		//Find this 2 fields on scope
 		deleteField, hasDeletedOnField := scope.FieldByName("DeletedOn")
 		isDel, hasIsDeletedOnField := scope.FieldByName("isDel")
 		//Soft delete
@@ -120,7 +122,7 @@ func deleteCallBack(scope *gorm.Scope) {
 		if !scope.Search.Unscoped && hasDeletedOnField && hasIsDeletedOnField {
 			//just update the the value
 			now := time.Now().Unix()
-			scope.Raw(fmt.Sprintf("UPDATE %v SET %v=%v,%v=%v%v%v",
+			sql := fmt.Sprintf("UPDATE %v SET %v=%v,%v=%v%v%v",
 				scope.QuotedTableName(),
 				scope.Quote(deleteField.DBName),
 				scope.AddToVars(now),
@@ -128,15 +130,16 @@ func deleteCallBack(scope *gorm.Scope) {
 				scope.AddToVars(1),
 				addExtraSpaceIfExist(scope.CombinedConditionSql()), //if current scope had any condition sql ,combine to current sql(eg:where ,join etc....)
 				addExtraSpaceIfExist(extraOpt),                     //combine the option
-			),
 			)
+			scope.Raw(sql).Exec()
 		} else {
 			//hard delete
-			scope.Raw(fmt.Sprintf("DELETE FROM %v%v%v",
+			sql := fmt.Sprintf("DELETE FROM %v%v%v",
 				scope.QuotedTableName(),
 				addExtraSpaceIfExist(scope.CombinedConditionSql()), //combine the sql
 				addExtraSpaceIfExist(extraOpt),
-			))
+			)
+			scope.Raw(sql).Exec()
 		}
 	}
 }

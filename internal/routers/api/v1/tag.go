@@ -4,8 +4,10 @@ import (
 	"github.com/RyanTokManMokMTM/blog-service/global"
 	"github.com/RyanTokManMokMTM/blog-service/internal/service"
 	"github.com/RyanTokManMokMTM/blog-service/pkg/app"
+	"github.com/RyanTokManMokMTM/blog-service/pkg/convert"
 	"github.com/RyanTokManMokMTM/blog-service/pkg/errcode"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type (
@@ -17,20 +19,88 @@ func NewTag() *Tag {
 	return &Tag{}
 }
 
-func (t *Tag) Get(ctx *gin.Context) {}
+func (t *Tag) Get(ctx *gin.Context) {
+	//param := service.
+}
 
-func (t *Tag) Create(ctx *gin.Context) {}
+func (t *Tag) Create(ctx *gin.Context) {
+	param := service.CreateTagRequest{}
+	res := app.NewResponse(ctx)
+	valid, errs := app.BindAndValid(ctx, &param)
+	if !valid {
+		global.Logger.Errorf("app.BindAndValid errors:%v", errs)
+		res.ToErrorResponse(errcode.InvalidParams.WithDetail(errs.Error()))
+		return
+	}
 
-func (t *Tag) Update(ctx *gin.Context) {}
+	svc := service.New(ctx)
+	err := svc.CreateTag(&param)
+	if err != nil {
+		global.Logger.Errorf("Service.CreateTag errors:%v", errs)
+		res.ToErrorResponse(errcode.ErrorCountTagFail.WithDetail(err.Error()))
+		return
+	}
 
-func (t *Tag) Delete(ctx *gin.Context) {}
+	res.ToResponse(gin.H{})
+	return
+}
+
+func (t *Tag) Update(ctx *gin.Context) {
+	param := service.UpdateTagRequest{
+		ID: convert.StrTo(ctx.Param("id")).MustUInt32(),
+	}
+
+	res := app.NewResponse(ctx)
+	valid, errs := app.BindAndValid(ctx, &param)
+	if !valid {
+		global.Logger.Errorf("app.BindAndValid error:%s", errs)
+		res.ToErrorResponse(errcode.InvalidParams.WithDetail(errs.Error()))
+		return
+	}
+
+	svc := service.New(ctx)
+	if err := svc.UpdateTag(&param); err != nil {
+		global.Logger.Errorf("Service.UpdateTag error:%v", err)
+		res.ToErrorResponse(errcode.ErrorUpdateTagFail.WithDetail(err.Error()))
+		return
+	}
+
+	res.ToResponse(gin.H{})
+	return
+}
+
+func (t *Tag) Delete(ctx *gin.Context) {
+	param := service.DeleteTagRequest{
+		ID: convert.StrTo(ctx.Param("id")).MustUInt32(),
+	}
+
+	log.Println(param.ID)
+	res := app.NewResponse(ctx)
+	valid, errs := app.BindAndValid(ctx, &param)
+	if !valid {
+		global.Logger.Errorf("app.BindAndValid errors:%v", errs)
+		res.ToErrorResponse(errcode.InvalidParams.WithDetail(errs.Error()))
+		return
+	}
+
+	svc := service.New(ctx)
+	if err := svc.DeleteTag(&param); err != nil {
+		global.Logger.Errorf("Service.DeleteTag error:%v", err)
+		res.ToErrorResponse(errcode.ErrorDeleteTagFail.WithDetail(err.Error()))
+		return
+	}
+
+	res.ToResponse(gin.H{})
+	return
+
+}
 
 func (t *Tag) List(ctx *gin.Context) {
 	//decode the request
 	param := service.TagListRequest{}
 	res := app.NewResponse(ctx)
-	vaild, errs := app.BindAndValid(ctx, &param)
-	if !vaild {
+	valid, errs := app.BindAndValid(ctx, &param)
+	if !valid {
 		//failed
 		global.Logger.Errorf("App.BindAndValid Error:%v", errs)
 		res.ToErrorResponse(errcode.InvalidParams.WithDetail(errs.Error()))

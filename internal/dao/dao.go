@@ -30,13 +30,24 @@ func (d *Dao) GetTagLists(name string, state uint8, page, pageSize int) ([]*mode
 }
 
 func (d *Dao) CreateTag(name string, state uint8, createBy string) error {
-	tag := model.Tag{Model: &model.Model{CreateBy: createBy}, Name: name, State: state}
+	tag := model.Tag{Model: &model.Model{CreatedBy: createBy}, Name: name, State: state}
 	return tag.Create(d.engine)
 }
 
 func (d *Dao) UpdateTag(id uint32, name string, state uint8, modifiedBy string) error {
 	tag := model.Tag{Model: &model.Model{ID: id, ModifiedBy: modifiedBy}, Name: name, State: state}
-	return tag.Update(d.engine)
+	//return tag.Update(d.engine)
+
+	value := map[string]interface{}{
+		"state":       state,
+		"modified_by": modifiedBy,
+	}
+
+	if name != "" {
+		value["name"] = name
+	}
+
+	return tag.Update(d.engine, value)
 }
 
 func (d *Dao) DeleteTag(id uint32) error {

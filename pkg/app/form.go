@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/RyanTokManMokMTM/blog-service/global"
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	val "github.com/go-playground/validator/v10"
@@ -37,10 +36,9 @@ func (v ValidErrors) Errors() []string {
 
 func BindAndValid(ctx *gin.Context, v interface{}) (bool, ValidErrors) {
 	var errs ValidErrors
-	err := ctx.ShouldBind(&v) //binding the context to an interface
+	err := ctx.ShouldBind(v) //binding the context to an interface
 	if err != nil {
 		v := ctx.Value("trans")
-		global.Logger.Warning("testing")
 		trans, _ := v.(ut.Translator)
 		vals, ok := err.(val.ValidationErrors)
 		if !ok {
