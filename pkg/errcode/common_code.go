@@ -22,3 +22,12 @@ var (
 	ErrorDeleteTagFail  = NewError(201004, "Delete Tag Failed")
 	ErrorCountTagFail   = NewError(201005, "Count Tag Failed")
 )
+
+var (
+	ErrorGetArticleFailed     = NewError(202001, "Get Article Failed")
+	ErrorCreateArticleFailed  = NewError(202002, "Create Article Failed")
+	ErrorUpdateArticleFailed  = NewError(202003, "Update Article Failed")
+	ErrorDeleteArticleFailed  = NewError(202004, "Delete Article Failed")
+	ErrorGetArticleListFailed = NewError(202005, "Get Article List Failed")
+	ErrorCountArticleFailed   = NewError(202006, "Count Article Failed")
+)

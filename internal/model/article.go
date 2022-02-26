@@ -18,14 +18,14 @@ func (a Article) TableName() string {
 }
 
 //Get -get record by id
-func (a Article) Get(db *gorm.DB) (Article, error) {
+func (a Article) Get(db *gorm.DB) (*Article, error) {
 	var result Article
 	db = db.Where("id = ? AND state = ? AND is_del = ?", a.ID, a.State, 0)
 	err := db.First(&result).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return result, err
+		return nil, err
 	}
-	return result, nil
+	return &result, nil
 }
 
 //List TODO - Get All Record with not deleted and not state 1
@@ -52,8 +52,11 @@ func (a Article) List(db *gorm.DB, pageOffset, pageSize int) ([]*Article, error)
 }
 
 //Create TODO - Create article
-func (a Article) Create(db *gorm.DB) error {
-	return db.Create(&a).Error
+func (a Article) Create(db *gorm.DB) (*Article, error) {
+	if err := db.Create(&a); err != nil {
+		return nil, err
+	}
+	return &a, nil
 }
 
 //Update TODO - Update Article
