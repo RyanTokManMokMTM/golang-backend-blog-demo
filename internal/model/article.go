@@ -13,6 +13,16 @@ type (
 	}
 )
 
+type ArticleRow struct {
+	ArticleId     uint32
+	ArticleTitle  string
+	ArticleDesc   string
+	CoverImageUrl string
+	Content       string
+	TagId         uint32
+	TagName       string
+}
+
 func (a Article) TableName() string {
 	return "blog_article"
 }
@@ -53,7 +63,7 @@ func (a Article) List(db *gorm.DB, pageOffset, pageSize int) ([]*Article, error)
 
 //Create TODO - Create article
 func (a Article) Create(db *gorm.DB) (*Article, error) {
-	if err := db.Create(&a); err != nil {
+	if err := db.Create(&a).Error; err != nil {
 		return nil, err
 	}
 	return &a, nil
@@ -94,10 +104,10 @@ func (a Article) ListByTagID(db *gorm.DB, tagID uint32, pageOffset, pageSize int
 	}
 
 	//get row data and return rows
-	rows, err := db.Select(selectedField).Table(ArticleTag{}.TableName()+"AS at").
-		Joins("LEFT JOIN "+Tag{}.TableName()+"AS t ON at.tag_id = t.id").
-		Joins("LEFT JOIN"+Article{}.TableName()+"AS ar ON at.article_id = ar.id").
-		Where("at.tag_id = ? AND ar.state = ? AND ar.is_del = ?", tagID, a.State, 0).Rows()
+	rows, err := db.Select(selectedField).Table(ArticleTag{}.TableName()+" AS atag").
+		Joins("LEFT JOIN "+Tag{}.TableName()+" AS t ON atag.tag_id = t.id").
+		Joins("LEFT JOIN "+Article{}.TableName()+" AS ar ON atag.article_id = ar.id").
+		Where("atag.tag_id = ? AND ar.state = ? AND ar.is_del = ?", tagID, a.State, 0).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -131,23 +141,13 @@ func (a Article) ListByTagID(db *gorm.DB, tagID uint32, pageOffset, pageSize int
 //TODO - Not Working now
 func (a Article) CountByTagID(db *gorm.DB, tagID uint32) (uint64, error) {
 	var count uint64
-	err := db.Table(ArticleTag{}.TableName()+"AS at").
-		Joins("LEFT JOIN"+Tag{}.TableName()+"AS t ON at.tag_id = t.id").
-		Joins("LEFT JOIN"+Article{}.TableName()+"AS ar ON at.article_id = ar.id").
-		Where("at.tag_id = ? AND ar.state = ? AND ar.is_del = ?", tagID, a.State, 0).Count(&count).Error
+	err := db.Table(ArticleTag{}.TableName()+" AS atag").
+		Joins("LEFT JOIN "+Tag{}.TableName()+" AS t ON atag.tag_id = t.id").
+		Joins("LEFT JOIN "+Article{}.TableName()+" AS ar ON atag.article_id = ar.id").
+		Where("atag.tag_id = ? AND ar.state = ? AND ar.is_del = ?", tagID, a.State, 0).Count(&count).Error
 
 	if err != nil {
 		return 0, err
 	}
 	return count, nil
-}
-
-type ArticleRow struct {
-	ArticleId     uint32
-	ArticleTitle  string
-	ArticleDesc   string
-	CoverImageUrl string
-	Content       string
-	TagId         uint32
-	TagName       string
 }

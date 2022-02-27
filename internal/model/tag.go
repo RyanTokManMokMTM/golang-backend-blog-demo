@@ -63,3 +63,13 @@ func (t Tag) Update(db *gorm.DB, value interface{}) error {
 func (t Tag) Delete(db *gorm.DB) error {
 	return db.Where("id = ? AND is_del = ?", t.Model.ID, 0).Delete(&t).Error
 }
+
+//GetInfo of the tag
+func (t Tag) GetInfo(db *gorm.DB) (Tag, error) {
+	var result Tag
+	if err := db.Where("id = ? AND is_del = ? AND state = ?", t.ID, 0, t.State).First(&result).Error; err != nil {
+		return result, err //no result
+	}
+	return result, nil
+
+}

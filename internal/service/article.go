@@ -19,30 +19,30 @@ type CountArticleRequest struct {
 //ArticleListRequest list of record by name
 type ArticleListRequest struct {
 	ID    uint32 `form:"tag_id" binding:"required,gte=1"`
-	State uint8  `form:"state,default=1" binding:"oneof=01"`
+	State uint8  `form:"state,default=1" binding:"oneof=0 1"`
 }
 
 //CreateArticleRequest Create an article
 type CreateArticleRequest struct {
-	TagID         uint32 `form:"tag_id" binding:"require,gte=1"`
-	Title         string `form:"title" binding:"required ,min=2,max=100"`
+	TagID         uint32 `form:"tag_id" binding:"required,gte=1"`
+	Title         string `form:"title" binding:"required,min=2,max=100"`
 	Desc          string `form:"desc" binding:"required"`
 	Content       string `form:"content" binding:"required"`
 	CoverImageURL string `form:"cover_image_url" binding:"required"`
 	CreateBy      string `form:"create_by" binding:"required,min=3,max=100"`
-	State         uint8  `form:"state,default=1" binding:"oneof=01"`
+	State         uint8  `form:"state,default=1" binding:"oneof=0 1"`
 }
 
 //UpdateArticleRequest update article by id
 type UpdateArticleRequest struct {
-	ID            uint32 `form:"id" binding:"required,get=1"`
-	TagID         uint32 `form:"tag_id" binding:"require,gte=1"`
-	Title         string `form:"title" binding:"required ,min=2,max=100"`
+	ID            uint32 `form:"id" binding:"required,gte=1"`
+	TagID         uint32 `form:"tag_id" binding:"required,gte=1"`
+	Title         string `form:"title" binding:"required,min=2,max=100"`
 	Desc          string `form:"desc" binding:"required"`
 	Content       string `form:"content" binding:"required"`
 	CoverImageURL string `form:"cover_image_url" binding:"required"`
 	ModifiedBy    string `form:"modified_by" binding:"required,min=3,max=100"`
-	State         uint8  `form:"state,default=1" binding:"oneof=01"`
+	State         uint8  `form:"state,default=1" binding:"oneof=0 1"`
 }
 
 //DeleteArticleRequest delete article by id
@@ -62,10 +62,11 @@ type Article struct {
 
 //HERE NEED TO USE RELATIONAL DB schema
 
-func (serve *Service) CountArticle(param *CountArticleRequest) (int64, error) {
-	return serve.dao.CountTag(param.Name, param.State)
-}
-func (serve *Service) ListArticle(param *ArticleListRequest, pager *app.Pager) ([]*Article, uint64, error) {
+//func (serve *Service) CountArticle(param *CountArticleRequest) (int64, error) {
+//	return serve.dao.CountTag(param.Name, param.State)
+//}
+
+func (serve *Service) GetArticleList(param *ArticleListRequest, pager *app.Pager) ([]*Article, uint64, error) {
 	//total record
 	articleCount, err := serve.dao.CountArticleByTagID(param.ID, param.State)
 	if err != nil {
@@ -94,11 +95,49 @@ func (serve *Service) ListArticle(param *ArticleListRequest, pager *app.Pager) (
 	return articlesList, articleCount, nil
 }
 
-func (serve *Service) GetArticle(param *ArticleRequest) (*model.Article, error) {
-	return serve.dao.GetArticle(param.ID, param.State)
+func (serve *Service) GetArticle(param *ArticleRequest) (*Article, error) {
+	//It needs an article record with tag
+	//we need to query ArticleTag Table and combine it together
+	article, err := serve.dao.GetArticle(param.ID, param.State)
+	if err != nil {
+		return nil, err
+	}
+
+	//get the relevant tag
+	articleTag, err := serve.dao.GetArticleTagByAID(article.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	//get tag detail info
+	tagInfo, err := serve.dao.GetTagInfo(articleTag.TagID, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Article{
+		ID:            article.ID,
+		Title:         article.Title,
+		Desc:          article.Desc,
+		Content:       article.Content,
+		CoverImageURL: article.CoverImageUrl,
+		State:         article.State,
+		Tag:           &tagInfo,
+	}, nil
 }
+
 func (serve *Service) UpdateArticle(param *UpdateArticleRequest) error {
-	return serve.dao.UpdateTag(param.ID, param.Name, param.State, param.ModifiedBy)
+	//Updating Article
+	err := serve.dao.UpdateArticle(param.ID, param.Title, param.Desc, param.Content, param.CoverImageURL, param.State, param.ModifiedBy)
+	if err != nil {
+		return err
+	}
+	//Updating ArticleTag
+	err = serve.dao.UpdateArticleTag(param.ID, param.TagID, param.ModifiedBy)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (serve *Service) CreateArticle(param *CreateArticleRequest) error {
@@ -118,7 +157,7 @@ func (serve *Service) CreateArticle(param *CreateArticleRequest) error {
 }
 
 func (serve *Service) DeleteArticle(param *DeleteArticleRequest) error {
-	//need to delete article_tag table record too )
+	//need to delete article_tag table record too
 	err := serve.dao.DeleteArticle(param.ID)
 	if err != nil {
 		return err

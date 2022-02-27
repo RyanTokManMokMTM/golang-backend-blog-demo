@@ -24,10 +24,11 @@ func NewResponse(ctx *gin.Context) *Response {
 
 //ToResponse response a data
 func (res *Response) ToResponse(data interface{}) {
-	if data != nil {
+	if data == nil {
 		//set data to empty
 		data = gin.H{}
 	}
+
 	res.Ctx.JSON(http.StatusOK, data) //set context json with data
 }
 
