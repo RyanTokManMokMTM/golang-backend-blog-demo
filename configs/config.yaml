@@ -12,6 +12,14 @@ App:
   LogSavePath: storage/log
   LogFileName: app
   LogFileExt: .log
+  UploadSavePath : storage/uploads  #resources path
+  UploadSavePathURL : http://127.0.0.1:8000/static #resoures URL
+  UploadImageMaxSize : 5 #Image size in MB
+  UploadImageAllowExts:
+    - .jpg
+    - .jpeg
+    - .png
+    #Allowed Image Extension
 
 Database:
   DBType: mysql

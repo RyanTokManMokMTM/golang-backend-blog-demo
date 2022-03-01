@@ -37,7 +37,7 @@ func (t *Tag) Create(ctx *gin.Context) {
 	err := svc.CreateTag(&param)
 	if err != nil {
 		global.Logger.Errorf("Service.CreateTag errors:%v", errs)
-		res.ToErrorResponse(errcode.ErrorCountTagFail.WithDetail(err.Error()))
+		res.ToErrorResponse(errcode.ErrorCreateTagFail.WithDetail(err.Error()))
 		return
 	}
 

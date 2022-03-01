@@ -16,18 +16,22 @@ var (
 )
 
 var (
-	ErrorGetTagListFail = NewError(201001, "Get Tag List Failed")
-	ErrorCreateTagFail  = NewError(201002, "Create Tag Failed")
-	ErrorUpdateTagFail  = NewError(201003, "Update Tag Failed")
-	ErrorDeleteTagFail  = NewError(201004, "Delete Tag Failed")
-	ErrorCountTagFail   = NewError(201005, "Count Tag Failed")
+	ErrorGetTagListFail = NewError(2001001, "Get Tag List Failed")
+	ErrorCreateTagFail  = NewError(2001002, "Create Tag Failed")
+	ErrorUpdateTagFail  = NewError(2001003, "Update Tag Failed")
+	ErrorDeleteTagFail  = NewError(2001004, "Delete Tag Failed")
+	ErrorCountTagFail   = NewError(2001005, "Count Tag Failed")
 )
 
 var (
-	ErrorGetArticleFailed     = NewError(202001, "Get Article Failed")
-	ErrorCreateArticleFailed  = NewError(202002, "Create Article Failed")
-	ErrorUpdateArticleFailed  = NewError(202003, "Update Article Failed")
-	ErrorDeleteArticleFailed  = NewError(202004, "Delete Article Failed")
-	ErrorGetArticleListFailed = NewError(202005, "Get Article List Failed")
-	ErrorCountArticleFailed   = NewError(202006, "Count Article Failed")
+	ErrorGetArticleFailed     = NewError(2002001, "Get Article Failed")
+	ErrorCreateArticleFailed  = NewError(2002002, "Create Article Failed")
+	ErrorUpdateArticleFailed  = NewError(2002003, "Update Article Failed")
+	ErrorDeleteArticleFailed  = NewError(2002004, "Delete Article Failed")
+	ErrorGetArticleListFailed = NewError(2002005, "Get Article List Failed")
+	ErrorCountArticleFailed   = NewError(2002006, "Count Article Failed")
+)
+
+var (
+	ErrorUploadFileFailed = NewError(2003001, "Upload File Failed")
 )
