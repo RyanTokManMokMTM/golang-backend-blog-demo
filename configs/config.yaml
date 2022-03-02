@@ -33,5 +33,8 @@ Database:
   MaxIdleConns: 10
   MaxOpenConns: 30
 
-
+JWT:
+  Secret: jacksontmm
+  Issuer: blog-service
+  Expire: 7200 # in second
 

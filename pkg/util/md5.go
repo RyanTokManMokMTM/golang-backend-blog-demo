@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-//EnCodeMD5 formatting file name using hash and md5 encoder
+//EnCodeMD5 formatting value using hash and md5 encoder
 func EnCodeMD5(value string) string {
 	//md5 instance
 	m := md5.New()
@@ -13,5 +13,3 @@ func EnCodeMD5(value string) string {
 
 	return hex.EncodeToString(m.Sum(nil))
 }
-
-

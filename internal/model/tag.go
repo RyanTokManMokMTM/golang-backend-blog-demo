@@ -21,7 +21,7 @@ func (t Tag) Count(db *gorm.DB) (int64, error) {
 		db = db.Where("name = ?", t.Name) //searching by the name
 	}
 	db = db.Where("state = ?", t.State)                                              //searching by the state
-	if err := db.Model(&t).Where("id_del = ? ", 0).Count(&count).Error; err != nil { //count the record
+	if err := db.Model(&t).Where("is_del = ? ", 0).Count(&count).Error; err != nil { //count the record
 		return 0, err
 	}
 	return count, nil

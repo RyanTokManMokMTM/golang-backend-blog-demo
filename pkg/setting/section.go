@@ -34,4 +34,10 @@ type (
 		MaxIdleConns int
 		MaxOpenConns int
 	}
+
+	JWTSetting struct {
+		Secret string
+		Issuer string
+		Expire time.Duration
+	}
 )

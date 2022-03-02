@@ -70,7 +70,7 @@ func init() {
 		log.Fatalf("init database engine failed %s", err.Error())
 	}
 
-	if err := setupLogger(); err != nil {
+	if err := setUpLogger(); err != nil {
 		log.Fatalf("init logger failed %s", err.Error())
 	}
 }
@@ -98,9 +98,16 @@ func setUpSetting() error {
 		return err
 	}
 
+	err = setting.ReadSection("JWT", &global.JWTSetting)
+	if err != nil {
+		return err
+	}
+
 	//Server setting had set the request time out(read and write)
 	global.ServerSetting.ReadTimeOut *= time.Second
 	global.ServerSetting.WriteTimeOut *= time.Second
+	//JWT Expired time
+	global.JWTSetting.Expire *= time.Second
 	return nil
 }
 
@@ -113,7 +120,7 @@ func setUpDBEngine() error {
 }
 
 //setupLogger Set up the global DBEngine(gorm)
-func setupLogger() error {
+func setUpLogger() error {
 	fileName := global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt
 	global.Logger = customLog.NewLogger(&lumberjack.Logger{
 		Filename:  fileName,

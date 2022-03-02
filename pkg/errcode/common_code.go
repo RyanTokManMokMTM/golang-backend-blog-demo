@@ -29,7 +29,7 @@ var (
 	ErrorUpdateArticleFailed  = NewError(2002003, "Update Article Failed")
 	ErrorDeleteArticleFailed  = NewError(2002004, "Delete Article Failed")
 	ErrorGetArticleListFailed = NewError(2002005, "Get Article List Failed")
-	ErrorCountArticleFailed   = NewError(2002006, "Count Article Failed")
+	//ErrorCountArticleFailed   = NewError(2002006, "Count Article Failed")
 )
 
 var (

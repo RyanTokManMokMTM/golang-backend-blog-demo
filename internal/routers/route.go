@@ -3,10 +3,44 @@ package routers
 import (
 	"github.com/RyanTokManMokMTM/blog-service/global"
 	"github.com/RyanTokManMokMTM/blog-service/internal/middleware"
+	"github.com/RyanTokManMokMTM/blog-service/internal/routers/api"
 	v1 "github.com/RyanTokManMokMTM/blog-service/internal/routers/api/v1"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
+
+/*
+	JSON WEB TOKEN Authorization theory
+	Structure: Using hash to generate a token with format xxx.yyy.zzz(Header.payload.signature)
+	Header
+	{ //Information include
+		"alg":"HS256", //using algorithm ,HMACSHA256(HS256) by default
+		"typ:"JWT" //token Type
+	}
+	//Using base64URLEncode to this object and generate JWT header
+
+	Payload
+	{ //Storing information of jwt
+      //example:
+		sub :"",//subject
+		aud :"",//audience
+		jti :"",//jwt id
+		iat :"",//Issued at
+		iss :"",//Issuer - who is the publisher of the jwt
+		nbf :"",//Not Before - JWT is not available before the time jwt set.
+	}
+	//Using base64URLEncode to this object and generate JWT Payload
+	//base64URLEncode can be revered ,do not put any secure information into payload
+
+	Signature
+	{ //used to check whether header and payload was modified and using private key to sign the token
+		//when generating the JWT ,it uses a specified  key(secret) and a specified algorithm(default: SHA256) to produce the signature message/info
+		//MACSHA256(base64URLEncode(header).base64URLEncode(payload).secret) => JWT xxx.yyy.zzz
+	}
+
+	NOTE:base64URLEncode is base64 modified version -> Why need to be modified?
+	ANS:JWT is stored inside Header or used as query parameter.In URL some character is meaningful,so base64URLEncode will use another no meaning character to instead
+*/
 
 func NewRoute() *gin.Engine {
 	route := gin.New()
@@ -40,8 +74,9 @@ func NewRoute() *gin.Engine {
 
 	route.StaticFS("/static", http.Dir(global.AppSetting.UploadSavePath)) //serving with File system
 
+	route.GET("/auth", api.GetAuth) //testing to token service
 	route.POST("/upload/file", upload.UploadFile)
-	apiV1 := route.Group("/api/v1")
+	apiV1 := route.Group("/api/v1").Use(middleware.JWT())
 	{
 		//tags
 		apiV1.POST("/tags", tag.Create)
