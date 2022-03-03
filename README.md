@@ -1,7 +1,5 @@
 # Blog API Note
 
----
-
 **File Structure**
 
 ```text
