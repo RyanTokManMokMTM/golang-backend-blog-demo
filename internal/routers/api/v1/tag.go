@@ -19,9 +19,9 @@ func NewTag() *Tag {
 	return &Tag{}
 }
 
-func (t *Tag) Get(ctx *gin.Context) {
-	//param := service.
-}
+//func (t *Tag) Get(ctx *gin.Context) {
+//	//param := service.
+//}
 
 func (t *Tag) Create(ctx *gin.Context) {
 	param := service.CreateTagRequest{}

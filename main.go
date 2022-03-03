@@ -51,12 +51,6 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	//Testing Config setting is loaded or not
-	//fmt.Println(global.ServerSetting)
-	//fmt.Println(global.AppSetting)
-	//fmt.Println(global.DatabaseSetting)
-	//global logger testing
-	//global.Logger.Infof("%s :github.com/RyanTokManMokMTM/%s", "Testing", "blog-service")
 	log.Fatalln(server.ListenAndServe())
 }
 
