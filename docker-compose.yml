@@ -1,0 +1,25 @@
+version: '3'
+services:
+  mysql:
+    image: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+#
+  webapp:
+    build: . #build docker file that in current project
+    ports:
+      - 8000:8080
+    volumes:
+      - C:/testVol:/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    links:
+      - mysql:msql
