@@ -1,4 +1,4 @@
-# Blog API Note
+# Blog API
 
 **File Structure**
 
