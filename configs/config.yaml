@@ -42,9 +42,9 @@ JWT:
 Email:
   Host: smtp.gmail.com
   Port: 587 #port 25 is not allowed
-  Email: RyanTokManMokMTM@gmail.com
-  Password: vwjguztvcdacyehz
+  Email: xxxxx
+  Password: xxxxx
   IsSSL: true #default is true
-  From: RyanTokManMokMTM@gmail.com
+  From: xxxxx
   To:
-    - RyanTokManMokMTM@hotmail.com
+    - xxxxx
