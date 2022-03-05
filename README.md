@@ -1,4 +1,4 @@
-# Blog API
+# Blog API -aim: Learning Server Design and learn more about gin
 
 **File Structure**
 
