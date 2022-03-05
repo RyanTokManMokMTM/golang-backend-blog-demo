@@ -5,8 +5,11 @@ import (
 	"github.com/RyanTokManMokMTM/blog-service/internal/middleware"
 	"github.com/RyanTokManMokMTM/blog-service/internal/routers/api"
 	v1 "github.com/RyanTokManMokMTM/blog-service/internal/routers/api/v1"
+	"github.com/RyanTokManMokMTM/blog-service/pkg/limiter"
+	"github.com/RyanTokManMokMTM/blog-service/pkg/mail"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 /*
@@ -42,12 +45,27 @@ import (
 	ANS:JWT is stored inside Header or used as query parameter.In URL some character is meaningful,so base64URLEncode will use another no meaning character to instead
 */
 
+var methodLimiters = limiter.NewMethodLimiter().AddBuckets(limiter.LimiterRule{
+	Key:          "/auth",
+	FillInterval: time.Second,
+	Capacity:     10,
+	Quantum:      10, //each second for 10 quantum
+})
+
 func NewRoute() *gin.Engine {
 	route := gin.New()
-	route.Use(gin.Logger())
-	route.Use(gin.Recovery())
+	if global.ServerSetting.RunMode == "debug" {
+		//debug mode using default
+		route.Use(gin.Logger())
+		route.Use(gin.Recovery())
+	} else {
+		//release mode using custom recovery and logger
+		route.Use(middleware.AccessLog()) //with more detail
+		route.Use(middleware.Recovery())  //if panic send email and return error
+	}
 	route.Use(middleware.Translation()) //changing the validator to local language(zh/en)
-
+	route.Use(middleware.RateLimiter(methodLimiters))
+	route.Use(middleware.ContextTimeOut(global.AppSetting.ContextTimeOut)) //context time out is set as 60s
 	//swagger
 	//route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -76,6 +94,28 @@ func NewRoute() *gin.Engine {
 
 	route.GET("/auth", api.GetAuth) //testing to token service
 	route.POST("/upload/file", upload.UploadFile)
+	route.GET("/sendmail", func(ctx *gin.Context) {
+		m := mail.NewEmail(&mail.SMTP{
+			Host:     global.EmailSetting.Host,
+			Port:     global.EmailSetting.Port,
+			IsSSL:    global.EmailSetting.IsSSL,
+			UserName: global.EmailSetting.Email,
+			Password: global.EmailSetting.Password,
+			From:     global.EmailSetting.From,
+		})
+
+		err := m.SendMail(global.EmailSetting.To, "Email Demo", "Hello,welcome to the server")
+		if err != nil {
+			ctx.JSON(http.StatusOK, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "testing",
+		})
+	})
 	apiV1 := route.Group("/api/v1").Use(middleware.JWT())
 	{
 		//tags

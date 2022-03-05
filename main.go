@@ -97,9 +97,15 @@ func setUpSetting() error {
 		return err
 	}
 
+	err = setting.ReadSection("Email", &global.EmailSetting)
+	if err != nil {
+		return err
+	}
+
 	//Server setting had set the request time out(read and write)
 	global.ServerSetting.ReadTimeOut *= time.Second
 	global.ServerSetting.WriteTimeOut *= time.Second
+	global.AppSetting.ContextTimeOut *= time.Second
 	//JWT Expired time
 	global.JWTSetting.Expire *= time.Second
 	return nil
@@ -110,6 +116,7 @@ func setUpDBEngine() error {
 	var err error
 	//Warning:using := will cause global.DBEngine variable still be nil/nothing
 	global.DBEngine, err = model.NewDBEngine(global.DatabaseSetting)
+
 	return err
 }
 

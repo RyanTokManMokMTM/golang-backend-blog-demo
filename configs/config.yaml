@@ -12,6 +12,7 @@ App:
   LogSavePath: storage/log
   LogFileName: app
   LogFileExt: .log
+  ContextTimeOut: 60
   UploadSavePath : storage/uploads  #resources path
   UploadSavePathURL : http://127.0.0.1:8000/static #resoures URL
   UploadImageMaxSize : 5 #Image size in MB
@@ -25,7 +26,7 @@ Database:
   DBType: mysql
   User: root
   Password: admin
-  Host: mysql:3306
+  Host: 127.0.0.1:3306
   DBName: blog_services
   Table_Prefix: blog_
   Charset: utf8
@@ -38,3 +39,12 @@ JWT:
   Issuer: blog-service
   Expire: 7200 # in second
 
+Email:
+  Host: smtp.gmail.com
+  Port: 587 #port 25 is not allowed
+  Email: RyanTokManMokMTM@gmail.com
+  Password: vwjguztvcdacyehz
+  IsSSL: true #default is true
+  From: RyanTokManMokMTM@gmail.com
+  To:
+    - RyanTokManMokMTM@hotmail.com

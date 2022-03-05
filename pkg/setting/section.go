@@ -16,6 +16,7 @@ type (
 		LogSavePath          string
 		LogFileName          string
 		LogFileExt           string
+		ContextTimeOut       time.Duration
 		UploadSavePath       string
 		UploadSavePathURL    string
 		UploadImageMaxSize   int
@@ -39,5 +40,15 @@ type (
 		Secret string
 		Issuer string
 		Expire time.Duration
+	}
+
+	EmailSetting struct {
+		Host     string
+		Port     int
+		Email    string
+		Password string
+		IsSSL    bool
+		From     string
+		To       []string
 	}
 )

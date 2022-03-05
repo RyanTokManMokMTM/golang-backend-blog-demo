@@ -24,6 +24,8 @@ type (
 )
 
 func NewDBEngine(databaseSetting *setting.DatabaseSetting) (*gorm.DB, error) {
+	//create database sql
+
 	config := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&parseTime=%t&loc=Local",
 		databaseSetting.User,
 		databaseSetting.Password,
@@ -32,7 +34,6 @@ func NewDBEngine(databaseSetting *setting.DatabaseSetting) (*gorm.DB, error) {
 		databaseSetting.Charset,
 		databaseSetting.ParseTime)
 	db, err := gorm.Open(databaseSetting.DBType, config)
-
 	if err != nil {
 		return nil, err
 	}

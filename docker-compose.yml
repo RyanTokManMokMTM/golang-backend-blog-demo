@@ -10,7 +10,7 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
-#
+
   webapp:
     build: . #build docker file that in current project
     ports:
@@ -20,6 +20,5 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-
     links:
       - mysql:msql
