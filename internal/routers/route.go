@@ -8,6 +8,8 @@ import (
 	"github.com/RyanTokManMokMTM/blog-service/pkg/limiter"
 	"github.com/RyanTokManMokMTM/blog-service/pkg/mail"
 	"github.com/gin-gonic/gin"
+	swaggerFile "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 	"time"
 )
@@ -66,8 +68,10 @@ func NewRoute() *gin.Engine {
 	route.Use(middleware.Translation()) //changing the validator to local language(zh/en)
 	route.Use(middleware.RateLimiter(methodLimiters))
 	route.Use(middleware.ContextTimeOut(global.AppSetting.ContextTimeOut)) //context time out is set as 60s
+	route.Use(middleware.AppInfo())
+
 	//swagger
-	//route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFile.Handler))
 
 	//article handle obj
 	article := v1.NewArticle()

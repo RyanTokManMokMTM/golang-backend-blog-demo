@@ -44,6 +44,7 @@ func main() {
 	//if gin.Mode() == gin.DebugMode {
 	//	route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFile.Handler))
 	//}
+
 	server := http.Server{
 		Addr:           fmt.Sprintf("127.0.0.1:%s", global.ServerSetting.HttpPort),
 		Handler:        route,
