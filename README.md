@@ -1,4 +1,23 @@
+
 # Blog API -aim: Learning Server Design and learn more about gin
+
+
+---
+
+**Tool**
+
+*   Golang
+*   Gin-Gonic
+*   Gorm
+*   Mysql
+*   jwt-go
+*   gomail
+*   viper
+*   swagger-api
+*   rate limiter
+*   validator v10
+
+---
 
 **File Structure**
 
@@ -47,18 +66,38 @@ flowchart LR
 	B --> |Yes| MD[Middleware]
 	B ----> |No| CL
 	
-	MD --- Auth[auth] & Log[Logger] & Valid[Validator]
+	MD --- Auth[auth] & Log[Logger] & Valid[Validator] & CT[SetContectTimeOut] & AL[AccessLogger] & RL[RateLimter] & Re[Rocovery] & Info[AccessInfo]
 	Auth --> vd{token vaild}
+	Re --> panic{Panic}
+
+	panic ---> |No| CL[Controller]
+	panic ---> |Yes| mail[SendMailToDev]
+	mail ----> ed[\End\]
+	
+	CT ---> CL[Controller]
 	
 	vd --> |No| ed[\End\]
 	vd --> |Yes| CL[Controller]
+	
 	Log --> CL[Controller]
 	Valid --> CL[Controller]
 
 	CL ---> err{any err}
+	CL ---> to{timeout}
+	to --> |Yes| ed[\ENd\]
+
+	
 	err --> |Yes| ed
 	err --> |No| S[Service]
 	
+	Info ----> CL
+	AL ----> CL
+	
+	RL --> bk{TK Bk full?}
+	bk --> |Yes| ed
+	bk --> |No| CL
+	
+	S --> to
 	S --> DAO[Database access Object]
 	DAO --> DB[(ORM)]
 	DB -.->|result| DAO
@@ -68,6 +107,8 @@ flowchart LR
 	
 	
 ```
+
+---
 
 ---
 
@@ -1124,6 +1165,234 @@ func (log *Logger) Panicf(format string, v ...interface{}) {
 	log.Output(LevelWarning, fmt.Sprintf(format, v...))
 }
 
+```
+
+---
+
+#### Basic Middleware Design
+
+Essential middleware in any API Server
+
+*   Recovery middleware
+*   Info Logger middleware
+*   Rate Limiter middlware
+
+---
+
+**Recovery**
+
+>   In Gin-framework, we can just use a default recovery,but sometimes we want to add more custom feature on a recovery not just recover  the server.
+
+>   In this example ,we're gonna send the email to developer if any panic have happened.
+
+```go
+//Email Sending Feature - gopkg.in/gomail.v2
+
+//Email using SMTP Protocol
+type Email struct {
+	*SMTP
+}
+
+//SMTP define SMTP/Email server info
+type SMTP struct {
+	Host     string
+	Port     int
+	IsSSL    bool
+	UserName string
+	Password string
+	From     string
+}
+
+func NewEmail(info *SMTP) *Email {
+	return &Email{
+		SMTP: info,
+	}
+}
+
+/*
+SendMail
+@param to : to a group of email address
+@param subject : email subject
+@param body :content of the email
+*/
+func (e *Email) SendMail(to []string, subject, body string) error {
+	msg := gomail.NewMessage() //new email message and set required info including from address,to address etc
+	//email header format
+	msg.SetHeader("From", e.From)
+	msg.SetHeader("To", to...)
+	msg.SetHeader("Subject", subject)
+	msg.SetBody("text/html", body)
+
+	//Connect to SMTP server by given info
+	dia := gomail.NewDialer(e.Host, e.Port, e.UserName, e.Password)
+	dia.TLSConfig = &tls.Config{InsecureSkipVerify: e.IsSSL}
+	return dia.DialAndSend(msg) //open connection and send the message
+}
+
+
+```
+
+```go
+//Custom Recovery
+func Recovery() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		defer func() {
+			//what if panic happened?
+			//recover
+			//logging out the panic message
+
+			if err := recover(); err != nil {
+				s := "panic recover err: %v"
+				//to know which function was panic
+				global.Logger.WithCallerFrame().Errorf(s, err)
+
+				//send emil
+				m := mail.NewEmail(&mail.SMTP{
+					Host:     global.EmailSetting.Host,
+					Port:     global.EmailSetting.Port,
+					IsSSL:    global.EmailSetting.IsSSL,
+					UserName: global.EmailSetting.Email,
+					Password: global.EmailSetting.Password,
+					From:     global.EmailSetting.From,
+				})
+
+				err := m.SendMail(global.EmailSetting.To,
+					fmt.Sprintf("Panic happend,occuring time:%d", time.Now().Unix()),
+					fmt.Sprintf("Error Messgae %v", err))
+				if err != nil {
+					//email sending error
+					global.Logger.Panicf("mail.SendMail error:%v", err)
+				}
+
+				app.NewResponse(ctx).ToErrorResponse(errcode.ServerError)
+				ctx.Abort() //end of the request
+			}
+		}()
+
+		ctx.Next()
+	}
+}
+
+```
+
+**Access Logger**
+
+>   Sometimes we may want some more information about the request and the response that has made the server panic,includes time start,time end,http method,http status code and so on
+
+>   In Gin-Framework ,we can't access to response message/header directly,so we need to copy it out to our buffer
+
+```go
+//All info will store at the buffer 
+type AccessLogWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+```
+
+```go
+func AccessLog() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		bodyWriter := &AccessLogWriter{
+			body:           bytes.NewBufferString(""), //storing info from here
+			ResponseWriter: ctx.Writer,
+		}
+
+		ctx.Writer = bodyWriter //replace the default wirter - reference buffer
+		start := time.Now().Unix()
+		ctx.Next() //wait for it
+		end := time.Now().Unix()
+
+		field := logger.Fields{
+			"request":  ctx.Request.PostForm.Encode(), //encoding the form data
+			"response": bodyWriter.body.String(), //get info from buffer
+		}
+		s := "access log: method:%s,statusCode:%d,begin_time:%d,end_time=%d"
+
+		global.Logger.WithFields(field).Infof(s, ctx.Request.Method, bodyWriter.Status(), start, end)
+	}
+}
+
+```
+
+**Rate Limiter**
+
+>   In API Server, a request may lend the server panic/crash. So that, each incoming request need to set a timeout range,if the time is out,it will cancel the request immediately and prevent other client/request is being affected.
+
+
+>   Using *token bucket* （Rate Limiting）Algorithm
+
+```go
+//Define Limiter Interface
+type LimiterInterface interface {
+	Key(ctx *gin.Context) string                    //get the bucket by key
+	GetBucket(key string) (*ratelimit.Bucket, bool) //get rateLimit bucket
+	AddBuckets(rule ...LimiterRule) LimiterInterface
+}
+```
+
+```go
+//Define Limiter object
+//Limiter a group of rate limit bucket with a unique key
+type Limiter struct {
+    limiterBuckets map[string]*ratelimit.Bucket //uri : bucket rule
+}
+```
+
+```go
+//A Token Bucket Rule
+type LimiterRule struct {
+	Key          string        //key name
+	FillInterval time.Duration // time to fill
+	Capacity     int64         //bucket size
+	Quantum      int64         //total number of token each interval
+}
+```
+
+```go
+//Limiter middleware
+//RateLimiter pass any LimiterInterface(Limiter)
+func RateLimiter(ml limiter.LimiterInterface) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		key := ml.Key(ctx) //get uri from context
+		if b, ok := ml.GetBucket(key); ok {
+			total := b.TakeAvailable(1) //return available token/removed bucket
+			if total == 0 {
+				//no Available token
+				res := app.NewResponse(ctx)
+				res.ToErrorResponse(errcode.TooManyRequest)
+				ctx.Abort()
+				return
+			}
+		}
+
+		ctx.Next()
+	}
+}
+```
+
+```go
+//ContextTimeOut timeout control - router link A->B->C->D within time limit
+//Set a timeout range to any request
+func ContextTimeOut(t time.Duration) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		c, cancel := context.WithTimeout(ctx.Request.Context(), t) //set the request context with time out
+		defer cancel()                                             //if time is out ,cancel the request
+
+		ctx.Request = ctx.Request.WithContext(c) //change the context to contextWithTimeout of the request
+		ctx.Next()
+	}
+}
+
+```
+
+```go
+//Define a Token Buket
+var methodLimiters = limiter.NewMethodLimiter().AddBuckets(limiter.LimiterRule{
+	Key:          "/auth",
+	FillInterval: time.Second,
+	Capacity:     10,
+	Quantum:      10, //each second for 10 quantum
+})
 ```
 
 ---
