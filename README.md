@@ -2,8 +2,6 @@
 # Blog API -aim: Learning Server Design and learn more about gin
 
 
----
-
 **Tool**
 
 *   Golang
@@ -228,7 +226,7 @@ func NewRoute() *gin.Engine {
 
 ```
 
-#### `Server router controller - router/api/v1/xxx.go` - **Tags Controller as example **
+#### `Server router controller - router/api/v1/xxx.go` - **Tags Controller as example**
 
 ```go
 // define a tag controller struct 
