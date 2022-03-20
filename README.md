@@ -1,6 +1,9 @@
 
 # Blog API -aim: Learning Server Design and learn more about gin
-
+Docker-compose
+```
+docker-compose up
+```
 
 **Tool**
 
