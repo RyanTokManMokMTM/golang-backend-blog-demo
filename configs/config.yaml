@@ -30,7 +30,7 @@ Database:
   DBName: blog_services
   Table_Prefix: blog_
   Charset: utf8
-  ParseTime: True
+  ParseTime: true
   MaxIdleConns: 10
   MaxOpenConns: 30
 

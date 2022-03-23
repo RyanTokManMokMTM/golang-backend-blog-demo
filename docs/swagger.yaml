@@ -1,17 +1,411 @@
-basePath: /api/v1
-host: localhost:8080
+basePath: /
+definitions:
+  errcode.Error:
+    properties:
+      ErrorCode:
+        type: integer
+      ErrorDetail:
+        items:
+          type: string
+        type: array
+      ErrorMsg:
+        type: string
+    type: object
+  model.Tag:
+    properties:
+      created_by:
+        type: string
+      created_on:
+        type: integer
+      deleted_on:
+        type: integer
+      id:
+        type: integer
+      is_del:
+        type: integer
+      modified_by:
+        type: string
+      modified_on:
+        type: integer
+      name:
+        type: string
+      state:
+        type: integer
+    type: object
+  service.Article:
+    properties:
+      content:
+        type: string
+      cover_image_url:
+        type: string
+      desc:
+        type: string
+      id:
+        type: integer
+      state:
+        type: integer
+      tag:
+        $ref: '#/definitions/model.Tag'
+      title:
+        type: string
+    type: object
+host: localhost:8000
 info:
   contact:
     email: RyanTokManMokMTM@hotmaiol.com
     name: jackson.tmm
     url: https://github.com/RyanTokManMokMTM
-  description: IOS Music Web Service
+  description: Blogger API Demo
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: music api server
+  title: Blogger API
   version: "1.0"
-paths: {}
+paths:
+  /articles:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: article id
+        in: formData
+        name: id
+        required: true
+        type: integer
+      - description: article state
+        in: formData
+        name: state
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of article
+          schema:
+            items:
+              $ref: '#/definitions/service.Article'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: ArticleList
+      tags:
+      - article
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: TagID
+        in: formData
+        name: tagID
+        required: true
+        type: integer
+      - description: tagTitle
+        in: formData
+        name: tagTitle
+        required: true
+        type: string
+      - description: tagDesc
+        in: formData
+        name: tagDesc
+        required: true
+        type: string
+      - description: tagContent
+        in: formData
+        name: tagContent
+        required: true
+        type: string
+      - description: tagImgURL
+        in: formData
+        name: tagImgURL
+        required: true
+        type: string
+      - description: tagCreator
+        in: formData
+        name: tagCreator
+        required: true
+        type: string
+      - description: tag state 0:false,1:true
+        in: formData
+        name: tagState
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: CreateArticle
+      tags:
+      - article
+  /articles/{id}:
+    delete:
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: DeleteArticle
+      tags:
+      - article
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: get by article id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: get an article info
+          schema:
+            $ref: '#/definitions/service.Article'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: CreateArticle
+      tags:
+      - article
+    put:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: article id
+        in: formData
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: UpdateArticle
+      tags:
+      - article
+  /tags:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: 0:false,1:false
+        in: formData
+        name: state
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: strubg
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: DeleteTag
+      tags:
+      - tag
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: tag name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: author
+        in: formData
+        name: create_by
+        required: true
+        type: string
+      - description: 0:false,1:false
+        in: formData
+        name: state
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: CreateTag
+      tags:
+      - tag
+  /tags/{id}:
+    delete:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: id
+        in: path
+        name: uid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: strubg
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: DeleteTag
+      tags:
+      - tag
+    put:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: id
+        in: path
+        name: uid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: UpdateTag
+      tags:
+      - tag
+  /upload/file:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: uploading file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errcode.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errcode.Error'
+      security:
+      - BearerAuth: []
+      summary: UploadFile
+      tags:
+      - uploadFile
 schemes:
 - http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

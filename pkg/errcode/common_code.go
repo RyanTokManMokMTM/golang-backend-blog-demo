@@ -1,6 +1,6 @@
 package errcode
 
-//Define common code/Error -> Error
+//Define common ErrorCode/Error -> Error
 var (
 	Success = NewError(0, "succeed")
 

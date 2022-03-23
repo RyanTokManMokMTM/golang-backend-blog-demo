@@ -47,11 +47,11 @@ func (res *Response) ToResponseList(list interface{}, totalRow int) {
 //ToErrorResponse response a error (custom Error code)
 func (res *Response) ToErrorResponse(err *errcode.Error) {
 	response := gin.H{
-		"code": err.Code(),
-		"msg":  err.Msg(),
+		"code": err.ErrorCode(),
+		"msg":  err.ErrorMsg(),
 	}
 
-	detail := err.Detail()
+	detail := err.ErrorDetail()
 	if len(detail) > 0 {
 		response["detail"] = detail
 	}

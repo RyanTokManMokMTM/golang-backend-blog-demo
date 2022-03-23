@@ -7,78 +7,78 @@ import (
 
 //Error Response format ,All error Message using this format
 type Error struct {
-	code   int      `json:"code"`
-	msg    string   `json:"msg"`
-	detail []string `json:"detail"`
+	Code   int      `json:"ErrorCode"`
+	Msg    string   `json:"ErrorMsg"`
+	Detail []string `json:"ErrorDetail"`
 }
 
 var codes = map[int]string{}
 
-//NewError Custom Error Code
+//NewError Custom Error ErrorCode
 func NewError(code int, msg string) *Error {
 	if _, ok := codes[code]; ok {
-		//Not allow duplicating Code
+		//Not allow duplicating ErrorCode
 		panic(fmt.Sprintf("Error %d is already exist, please try another error", code))
 	}
 
 	codes[code] = msg
 	return &Error{
-		code: code,
-		msg:  msg,
+		Code: code,
+		Msg:  msg,
 	}
 }
 
 //Error Implement Error interface
 func (e *Error) Error() string {
-	return fmt.Sprintf("Error:%d,message:%s", e.Code(), e.Msg())
+	return fmt.Sprintf("Error:%d,message:%s", e.ErrorCode(), e.ErrorMsg())
 }
 
-func (e *Error) Code() int {
-	return e.code
+func (e *Error) ErrorCode() int {
+	return e.Code
 }
 
-func (e *Error) Msg() string {
-	return e.msg
+func (e *Error) ErrorMsg() string {
+	return e.Msg
 }
 
-func (e *Error) Msgf(args []interface{}) string {
-	return fmt.Sprintf(e.msg, args...)
+func (e *Error) ErrorMsgf(args []interface{}) string {
+	return fmt.Sprintf(e.Msg, args...)
 }
 
-func (e *Error) Detail() []string {
-	return e.detail
+func (e *Error) ErrorDetail() []string {
+	return e.Detail
 }
 
-//WithDetail set detail to error
+//WithDetail set ErrorDetail to error
 func (e *Error) WithDetail(details ...string) *Error {
 	newErr := *e
-	newErr.detail = []string{}
+	newErr.Detail = []string{}
 	for _, d := range details {
-		newErr.detail = append(newErr.detail, d)
+		newErr.Detail = append(newErr.Detail, d)
 	}
 	return &newErr
 }
 
-//StatusCode According to custom status code return related HTTP Status Code,easy to manager the server
+//StatusCode According to custom status ErrorCode return related HTTP Status ErrorCode,easy to manager the server
 func (e *Error) StatusCode() int {
-	switch e.Code() {
-	case Success.Code():
+	switch e.ErrorCode() {
+	case Success.ErrorCode():
 		return http.StatusOK
-	case ServerError.Code():
+	case ServerError.ErrorCode():
 		return http.StatusInternalServerError
-	case InvalidParams.Code():
+	case InvalidParams.ErrorCode():
 		return http.StatusBadRequest
-	case NotFound.Code():
+	case NotFound.ErrorCode():
 		return http.StatusNotFound
-	case UnauthorizedAuthNotExist.Code():
+	case UnauthorizedAuthNotExist.ErrorCode():
 		fallthrough //next case
-	case UnauthorizedTokenError.Code():
+	case UnauthorizedTokenError.ErrorCode():
 		fallthrough //next case
-	case UnauthorizedTokenGenerateError.Code():
+	case UnauthorizedTokenGenerateError.ErrorCode():
 		fallthrough //next case
-	case UnauthorizedTokenTimeOut.Code():
+	case UnauthorizedTokenTimeOut.ErrorCode():
 		return http.StatusUnauthorized
-	case TooManyRequest.Code():
+	case TooManyRequest.ErrorCode():
 		return http.StatusTooManyRequests
 	}
 

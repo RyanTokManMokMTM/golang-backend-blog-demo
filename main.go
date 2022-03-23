@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/RyanTokManMokMTM/blog-service/docs"
 	"github.com/RyanTokManMokMTM/blog-service/global"
 	"github.com/RyanTokManMokMTM/blog-service/internal/model"
 	"github.com/RyanTokManMokMTM/blog-service/internal/routers"
@@ -21,9 +22,9 @@ ErrCode - Custom Error - consistent
 Logger -  Logger with different info and store at log file
 */
 
-// @title music api server
+// @title Blogger API
 // @version 1.0
-// @description  IOS Music Web Service
+// @description  Blogger API Demo
 
 // @contact.name jackson.tmm
 // @contact.url https://github.com/RyanTokManMokMTM
@@ -32,19 +33,18 @@ Logger -  Logger with different info and store at log file
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
-// @BasePath /api/v1
+// @host localhost:8000
+// @BasePath /
 // @schemes http
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	//using the config setting variable that have loaded from yaml file
 	gin.SetMode(global.ServerSetting.RunMode)
 	route := routers.NewRoute()
 	//ignore API First
-	//if gin.Mode() == gin.DebugMode {
-	//	route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFile.Handler))
-	//}
-
 	server := http.Server{
 		Addr:           fmt.Sprintf("127.0.0.1:%s", global.ServerSetting.HttpPort),
 		Handler:        route,
